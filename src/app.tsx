@@ -9,7 +9,9 @@ const MOTIONS = [
 
 const problem: string[] = []
 for (let i = 0; i < 50; ++i) {
-  problem.push(MOTIONS[Math.floor(Math.random() * MOTIONS.length)])
+  const operator = OPERATORS[Math.floor(Math.random() * OPERATORS.length)]
+  const motion = MOTIONS[Math.floor(Math.random() * MOTIONS.length)]
+  problem.push(operator.concat(motion))
 }
 
 function App(_: any) {
@@ -18,7 +20,6 @@ function App(_: any) {
     <br />
     <textarea id="" name="" cols={30} rows={10}></textarea>
     <br />
-    hello world
   </div>
 }
 
