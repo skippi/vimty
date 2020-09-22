@@ -40,7 +40,7 @@ const OPERATIONS = (() => {
 })();
 
 function modifyKey(key: string, shift: boolean) {
-  return shift ? key.toUpperCase() : key.toLowerCase()
+  return shift ? key.toUpperCase() : key.toLowerCase();
 }
 
 function App(_: {}) {
@@ -50,7 +50,7 @@ function App(_: {}) {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key.length > 1) return;
       const op = OPERATIONS[opIndex];
-      const key = modifyKey(event.key, event.shiftKey)
+      const key = modifyKey(event.key, event.shiftKey);
       let newCharIndex = charIndex;
       let newOpIndex = opIndex;
       if (key === op.charAt(charIndex)) {
@@ -72,17 +72,21 @@ function App(_: {}) {
   });
   return (
     <Prompt
-      current={OPERATIONS[opIndex].slice(charIndex)}
+      typed={OPERATIONS[opIndex].slice(0, charIndex)}
+      tail={OPERATIONS[opIndex].slice(charIndex)}
       remaining={OPERATIONS.slice(opIndex + 1)}
     />
   );
 }
 
-function Prompt(props: { current: string; remaining: string[] }) {
-  const { current, remaining } = props;
+function Prompt(props: { typed: string; tail: string; remaining: string[] }) {
+  const { typed, tail, remaining } = props;
   return (
     <div>
-      <div style={{ color: "red" }}>{current}</div>
+      <div>
+        <span style={{ color: "red" }}>{typed}</span>
+        <span>{tail}</span>
+      </div>
       <div>{remaining.join(" ")}</div>
     </div>
   );
