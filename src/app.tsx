@@ -39,16 +39,18 @@ const OPERATIONS = (() => {
   return ops;
 })();
 
+function modifyKey(key: string, shift: boolean) {
+  return shift ? key.toUpperCase() : key.toLowerCase()
+}
+
 function App(_: {}) {
   const [opIndex, setOpIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key.length > 1) return;
       const op = OPERATIONS[opIndex];
-      if (event.key === "Shift") return;
-      const key = event.shiftKey
-        ? event.key.toUpperCase()
-        : event.key.toLowerCase();
+      const key = modifyKey(event.key, event.shiftKey)
       let newCharIndex = charIndex;
       let newOpIndex = opIndex;
       if (key === op.charAt(charIndex)) {
