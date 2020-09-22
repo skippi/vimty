@@ -39,31 +39,59 @@ const OPERATIONS = (() => {
   return ops;
 })();
 
+interface App {
+  remChars: string;
+  remOperations: string[];
+  typedChars: string;
+}
+
+function makeApp(): App {
+  return {
+    remChars: OPERATIONS[0],
+    remOperations: OPERATIONS.slice(1),
+    typedChars: "",
+  };
+}
+
+function inputApp(app: Readonly<App>, key: string): App {
+  if (key.length > 1) return app;
+  if (key !== app.remChars.slice(0, 1)) return resetTyped(app);
+  const inputed = {
+    ...app,
+    remChars: app.remChars.slice(1),
+    typedChars: app.typedChars.concat(key),
+  };
+  return tryLoadNextOperation(inputed);
+}
+
+function tryLoadNextOperation(app: Readonly<App>): App {
+  if (app.remChars) return app;
+  return {
+    ...app,
+    remChars: app.remOperations[0],
+    remOperations: app.remOperations.slice(1),
+    typedChars: "",
+  };
+}
+
+function resetTyped(app: Readonly<App>): App {
+  return {
+    ...app,
+    remChars: app.typedChars.concat(app.remChars),
+    typedChars: "",
+  };
+}
+
 function modifyKey(key: string, shift: boolean) {
   return shift ? key.toUpperCase() : key.toLowerCase();
 }
 
-function App(_: {}) {
-  const [opIndex, setOpIndex] = useState(0);
-  const [charIndex, setCharIndex] = useState(0);
+function AppView(_: {}) {
+  const [app, setApp] = useState(makeApp());
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key.length > 1) return;
-      const op = OPERATIONS[opIndex];
       const key = modifyKey(event.key, event.shiftKey);
-      let newCharIndex = charIndex;
-      let newOpIndex = opIndex;
-      if (key === op.charAt(charIndex)) {
-        newCharIndex += 1;
-        if (newCharIndex == op.length) {
-          newOpIndex += 1;
-          newCharIndex = 0;
-        }
-      } else {
-        newCharIndex = 0;
-      }
-      setOpIndex(newOpIndex);
-      setCharIndex(newCharIndex);
+      setApp(inputApp(app, key));
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => {
@@ -72,9 +100,9 @@ function App(_: {}) {
   });
   return (
     <Prompt
-      typed={OPERATIONS[opIndex].slice(0, charIndex)}
-      tail={OPERATIONS[opIndex].slice(charIndex)}
-      remaining={OPERATIONS.slice(opIndex + 1)}
+      typed={app.typedChars}
+      tail={app.remChars}
+      remaining={app.remOperations}
     />
   );
 }
@@ -92,4 +120,4 @@ function Prompt(props: { typed: string; tail: string; remaining: string[] }) {
   );
 }
 
-ReactDOM.render(<App />, document.getElementById("root"));
+ReactDOM.render(<AppView />, document.getElementById("root"));
