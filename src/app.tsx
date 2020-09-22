@@ -54,6 +54,7 @@ function makeApp(): App {
 }
 
 function inputApp(app: Readonly<App>, key: string): App {
+  if (key == "Escape") return resetTyped(app);
   if (key.length > 1) return app;
   if (key !== app.remChars.slice(0, 1)) return resetTyped(app);
   const inputed = {
@@ -83,6 +84,7 @@ function resetTyped(app: Readonly<App>): App {
 }
 
 function modifyKey(key: string, shift: boolean) {
+  if (key.length > 1) return key;
   return shift ? key.toUpperCase() : key.toLowerCase();
 }
 
