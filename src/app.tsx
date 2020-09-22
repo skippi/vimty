@@ -29,15 +29,19 @@ const MOTIONS = [
   "gE",
 ];
 
-const OPERATIONS = (() => {
-  const ops: string[] = [];
-  for (let i = 0; i < 50; ++i) {
-    const operator = OPERATORS[Math.floor(Math.random() * OPERATORS.length)];
-    const motion = MOTIONS[Math.floor(Math.random() * MOTIONS.length)];
-    ops.push(operator.concat(motion));
+function times<T>(fn: () => T, n: number): T[] {
+  const ops: T[] = [];
+  for (let i = 0; i < n; ++i) {
+    ops.push(fn());
   }
   return ops;
-})();
+}
+
+function genOperation(): string {
+  const operator = OPERATORS[Math.floor(Math.random() * OPERATORS.length)];
+  const motion = MOTIONS[Math.floor(Math.random() * MOTIONS.length)];
+  return operator.concat(motion);
+}
 
 interface App {
   remChars: string;
@@ -47,8 +51,8 @@ interface App {
 
 function makeApp(): App {
   return {
-    remChars: OPERATIONS[0],
-    remOperations: OPERATIONS.slice(1),
+    remChars: genOperation(),
+    remOperations: times(genOperation, 49),
     typedChars: "",
   };
 }
