@@ -25,16 +25,21 @@ function App(_: {}) {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const op = OPERATIONS[opIndex]
-      if (event.key == "Shift") return
-      if (event.key == op.charAt(charIndex)) {
-        setCharIndex(charIndex + 1)
+      if (event.key === "Shift") return
+      const key = event.shiftKey ? event.key.toUpperCase() : event.key.toLowerCase()
+      let newCharIndex = charIndex
+      let newOpIndex = opIndex
+      if (key === op.charAt(charIndex)) {
+        newCharIndex += 1
+        if (newCharIndex == op.length) {
+          newOpIndex += 1
+          newCharIndex = 0
+        }
       } else {
-        setCharIndex(0)
+        newCharIndex = 0
       }
-      if (charIndex >= op.length - 1) {
-        setCharIndex(0)
-        setOpIndex(opIndex + 1)
-      }
+      setOpIndex(newOpIndex)
+      setCharIndex(newCharIndex)
     }
     document.addEventListener("keydown", handleKeyDown)
     return () => { document.removeEventListener("keydown", handleKeyDown) }
