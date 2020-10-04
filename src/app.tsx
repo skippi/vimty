@@ -1,5 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+import produce, { Draft } from "immer";
 
 const { useEffect, useReducer, useRef } = React;
 
@@ -49,6 +50,13 @@ interface App {
   typedChars: string;
 }
 
+type Action = InputAction;
+
+interface InputAction {
+  type: "INPUT";
+  key: string;
+}
+
 function makeApp(): App {
   return {
     remChars: genOperation(),
@@ -57,35 +65,25 @@ function makeApp(): App {
   };
 }
 
-function inputApp(app: Readonly<App>, key: string): App {
-  if (key == "Escape") return resetTyped(app);
-  if (key.length > 1) return app;
-  if (key !== app.remChars.slice(0, 1)) return resetTyped(app);
-  const inputed = {
-    ...app,
-    remChars: app.remChars.slice(1),
-    typedChars: app.typedChars.concat(key),
-  };
-  return tryLoadNextOperation(inputed);
-}
-
-function tryLoadNextOperation(app: Readonly<App>): App {
-  if (app.remChars) return app;
-  return {
-    ...app,
-    remChars: app.remOperations[0],
-    remOperations: app.remOperations.slice(1),
-    typedChars: "",
-  };
-}
-
-function resetTyped(app: Readonly<App>): App {
-  return {
-    ...app,
-    remChars: app.typedChars.concat(app.remChars),
-    typedChars: "",
-  };
-}
+const app = produce((draft: Draft<App>, action: Action) => {
+  if (action.type == "INPUT") {
+    const { key } = action;
+    if (key === "Shift") return;
+    if (key === "Escape" || key !== draft.remChars.charAt(0)) {
+      draft.remChars = draft.typedChars + draft.remChars;
+      draft.typedChars = "";
+      return;
+    }
+    if (draft.remChars.length > 1) {
+      draft.remChars = draft.remChars.substring(1);
+      draft.typedChars += key;
+    } else {
+      draft.remChars = draft.remOperations[0];
+      draft.remOperations.shift();
+      draft.typedChars = "";
+    }
+  }
+});
 
 function modifyKey(key: string, shift: boolean) {
   if (key.length > 1) return key;
@@ -107,21 +105,24 @@ function useEventListener(event: string, handler: EventListener) {
 }
 
 function AppView(_: {}) {
-  const [app, dispatch] = useReducer(inputApp, makeApp());
+  const [state, dispatch] = useReducer(app, makeApp());
   useEventListener("keydown", (event: KeyboardEvent) => {
-    const key = modifyKey(event.key, event.shiftKey);
-    dispatch(key);
+    dispatch({ type: "INPUT", key: modifyKey(event.key, event.shiftKey) });
   });
   return (
     <Prompt
-      typed={app.typedChars}
-      tail={app.remChars}
-      remaining={app.remOperations}
+      typed={state.typedChars}
+      tail={state.remChars}
+      remaining={state.remOperations}
     />
   );
 }
 
-function Prompt(props: { typed: string; tail: string; remaining: string[] }) {
+function Prompt(props: {
+  typed: string;
+  tail: string;
+  remaining: readonly string[];
+}) {
   const { typed, tail, remaining } = props;
   return (
     <div>
