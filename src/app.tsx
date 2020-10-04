@@ -77,7 +77,7 @@ const app = produce((draft: Draft<App>, action: Action) => {
   }
 });
 
-function modifyKey(key: string, shift: boolean) {
+function modifyKey(key: string, shift: boolean): string {
   if (key.length > 1) return key;
   return shift ? key.toUpperCase() : key.toLowerCase();
 }
