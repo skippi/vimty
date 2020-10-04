@@ -57,14 +57,6 @@ interface InputAction {
   key: string;
 }
 
-function makeApp(): App {
-  return {
-    remChars: genOperation(),
-    remOperations: times(genOperation, 49),
-    typedChars: "",
-  };
-}
-
 const app = produce((draft: Draft<App>, action: Action) => {
   if (action.type == "INPUT") {
     const { key } = action;
@@ -105,7 +97,11 @@ function useEventListener(event: string, handler: EventListener) {
 }
 
 function AppView(_: {}) {
-  const [state, dispatch] = useReducer(app, makeApp());
+  const [state, dispatch] = useReducer(app, {
+    remChars: genOperation(),
+    remOperations: times(genOperation, 49),
+    typedChars: "",
+  });
   useEventListener("keydown", (event: KeyboardEvent) => {
     dispatch({ type: "INPUT", key: modifyKey(event.key, event.shiftKey) });
   });
