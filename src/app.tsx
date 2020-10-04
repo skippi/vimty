@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-const { useEffect, useState } = React;
+const { useEffect, useReducer, useRef } = React;
 
 const OPERATORS = ["y", "d", "=", "gq", "g?", ">", "<"];
 const MOTIONS = [
@@ -92,17 +92,25 @@ function modifyKey(key: string, shift: boolean) {
   return shift ? key.toUpperCase() : key.toLowerCase();
 }
 
-function AppView(_: {}) {
-  const [app, setApp] = useState(makeApp());
+function useEventListener(event: string, handler: EventListener) {
+  const ref: { current: EventListener } = useRef();
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const key = modifyKey(event.key, event.shiftKey);
-      setApp(inputApp(app, key));
-    };
-    document.addEventListener("keydown", handleKeyDown);
+    ref.current = handler;
+  }, [handler]);
+  useEffect(() => {
+    const listener = (event: Event) => ref.current(event);
+    addEventListener(event, listener);
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
+      removeEventListener(event, listener);
     };
+  }, [event, window]);
+}
+
+function AppView(_: {}) {
+  const [app, dispatch] = useReducer(inputApp, makeApp());
+  useEventListener("keydown", (event: KeyboardEvent) => {
+    const key = modifyKey(event.key, event.shiftKey);
+    dispatch(key);
   });
   return (
     <Prompt
