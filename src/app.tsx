@@ -60,7 +60,13 @@ interface InputAction {
 const app = produce((draft: Draft<App>, action: Action) => {
   if (action.type == "INPUT") {
     const { key } = action;
+    if (key === ":") {
+      draft.remChars = genOperation();
+      draft.remOperations = times(genOperation, 49);
+      draft.typedChars = "";
+    }
     if (key === "Shift") return;
+    if (draft.remChars === undefined) return;
     if (key === "Escape" || key !== draft.remChars.charAt(0)) {
       draft.remChars = draft.typedChars + draft.remChars;
       draft.typedChars = "";
