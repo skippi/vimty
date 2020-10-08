@@ -45,25 +45,33 @@ function genOperation(): string {
 }
 
 interface App {
+  testSize: number;
   remChars: string;
   remOperations: string[];
   typedChars: string;
 }
 
-type Action = InputAction;
+type Action = InputAction | ResetAction | ConfigAction;
 
 interface InputAction {
   type: "INPUT";
   key: string;
 }
 
+interface ResetAction {
+  type: "RESET";
+}
+
+interface ConfigAction {
+  type: "CONFIG";
+  size: number;
+}
+
 const app = produce((draft: Draft<App>, action: Action) => {
   if (action.type == "INPUT") {
     const { key } = action;
     if (key === ":") {
-      draft.remChars = genOperation();
-      draft.remOperations = times(genOperation, 49);
-      draft.typedChars = "";
+      Object.assign(draft, app(draft, { type: "RESET" }));
     }
     if (key === "Shift") return;
     if (draft.remChars === undefined) return;
@@ -80,6 +88,14 @@ const app = produce((draft: Draft<App>, action: Action) => {
       draft.remOperations.shift();
       draft.typedChars = "";
     }
+  } else if (action.type == "RESET") {
+    const size = isNaN(draft.testSize) ? 0 : draft.testSize;
+    draft.remChars = size > 0 ? genOperation() : "";
+    draft.remOperations = times(genOperation, size - 1);
+    draft.typedChars = "";
+  } else if (action.type == "CONFIG") {
+    draft.testSize = action.size;
+    Object.assign(draft, app(draft, { type: "RESET" }));
   }
 });
 
@@ -104,6 +120,7 @@ function useEventListener(event: string, handler: EventListener) {
 
 function AppView(_: {}) {
   const [state, dispatch] = useReducer(app, {
+    testSize: 50,
     remChars: genOperation(),
     remOperations: times(genOperation, 49),
     typedChars: "",
@@ -112,11 +129,20 @@ function AppView(_: {}) {
     dispatch({ type: "INPUT", key: modifyKey(event.key, event.shiftKey) });
   });
   return (
-    <Prompt
-      typed={state.typedChars}
-      tail={state.remChars}
-      remaining={state.remOperations}
-    />
+    <div>
+      <input
+        type="number"
+        value={state.testSize || ""}
+        onChange={(event) =>
+          dispatch({ type: "CONFIG", size: event.target.valueAsNumber })
+        }
+      />
+      <Prompt
+        typed={state.typedChars}
+        tail={state.remChars}
+        remaining={state.remOperations}
+      />
+    </div>
   );
 }
 
