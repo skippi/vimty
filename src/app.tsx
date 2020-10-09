@@ -44,8 +44,11 @@ function genOperation(): string {
   return operator.concat(motion);
 }
 
+type Millisecond = number;
+
 interface App {
   correctInputCount: number;
+  startTime: Millisecond;
   wrongInputCount: number;
   testSize: number;
   remChars: string;
@@ -124,6 +127,7 @@ function useEventListener(event: string, handler: EventListener) {
 
 function AppView(_: {}) {
   const [state, dispatch] = useReducer(app, {
+    startTime: Date.now(),
     correctInputCount: 0,
     wrongInputCount: 0,
     testSize: 50,
@@ -152,6 +156,11 @@ function AppView(_: {}) {
         state.correctInputCount /
         (state.correctInputCount + state.wrongInputCount)
       ).toFixed(4)}
+      &nbsp; / CPM:{" "}
+      {((state.correctInputCount / (Date.now() - state.startTime)) *
+        1000 *
+        60) /
+        3}
       <Prompt
         typed={state.typedChars}
         tail={state.remChars}
