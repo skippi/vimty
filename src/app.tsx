@@ -2,7 +2,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import produce, { Draft } from "immer";
 
-const { useEffect, useReducer, useRef } = React;
+const { useEffect, useReducer, useRef, useMemo } = React;
 
 const OPERATORS = ["y", "d", "=", "gq", "g?", ">", "<"];
 const MOTIONS = [
@@ -45,6 +45,8 @@ function genOperation(): string {
 }
 
 interface App {
+  correctInputCount: number;
+  wrongInputCount: number;
   testSize: number;
   remChars: string;
   remOperations: string[];
@@ -76,10 +78,12 @@ const app = produce((draft: Draft<App>, action: Action) => {
     if (key === "Shift") return;
     if (draft.remChars === undefined) return;
     if (key === "Escape" || key !== draft.remChars.charAt(0)) {
+      draft.wrongInputCount += 1;
       draft.remChars = draft.typedChars + draft.remChars;
       draft.typedChars = "";
       return;
     }
+    draft.correctInputCount += 1;
     if (draft.remChars.length > 1) {
       draft.remChars = draft.remChars.substring(1);
       draft.typedChars += key;
@@ -120,6 +124,8 @@ function useEventListener(event: string, handler: EventListener) {
 
 function AppView(_: {}) {
   const [state, dispatch] = useReducer(app, {
+    correctInputCount: 0,
+    wrongInputCount: 0,
     testSize: 50,
     remChars: genOperation(),
     remOperations: times(genOperation, 49),
@@ -137,6 +143,9 @@ function AppView(_: {}) {
           dispatch({ type: "CONFIG", size: event.target.valueAsNumber })
         }
       />
+      ACC:{" "}
+      {state.correctInputCount /
+        (state.correctInputCount + state.wrongInputCount)}
       <Prompt
         typed={state.typedChars}
         tail={state.remChars}
