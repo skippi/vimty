@@ -2,7 +2,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import produce, { Draft } from "immer";
 
-const { useEffect, useReducer, useRef, useMemo } = React;
+const { useEffect, useReducer, useRef } = React;
 
 const OPERATORS = ["y", "d", "=", "gq", "g?", ">", "<"];
 const MOTIONS = [
@@ -157,10 +157,10 @@ function AppView(_: {}) {
         (state.correctInputCount + state.wrongInputCount)
       ).toFixed(4)}
       &nbsp; / CPM:{" "}
-      {((state.correctInputCount / (Date.now() - state.startTime)) *
+      {(((state.correctInputCount / (Date.now() - state.startTime)) *
         1000 *
         60) /
-        3}
+        3).toFixed(2)}
       <Prompt
         typed={state.typedChars}
         tail={state.remChars}
