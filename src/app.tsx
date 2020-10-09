@@ -77,6 +77,7 @@ const app = produce((draft: Draft<App>, action: Action) => {
     const { key } = action;
     if (key === ":") {
       Object.assign(draft, app(draft, { type: "RESET" }));
+      return
     }
     if (key === "Shift") return;
     if (draft.remChars === undefined) return;
@@ -100,6 +101,9 @@ const app = produce((draft: Draft<App>, action: Action) => {
     draft.remChars = size > 0 ? genOperation() : "";
     draft.remOperations = times(genOperation, size - 1);
     draft.typedChars = "";
+    draft.correctInputCount = 0;
+    draft.wrongInputCount = 0;
+    draft.startTime = Date.now();
   } else if (action.type == "CONFIG") {
     draft.testSize = action.size;
     Object.assign(draft, app(draft, { type: "RESET" }));
@@ -157,10 +161,12 @@ function AppView(_: {}) {
         (state.correctInputCount + state.wrongInputCount)
       ).toFixed(4)}
       &nbsp; / CPM:{" "}
-      {(((state.correctInputCount / (Date.now() - state.startTime)) *
-        1000 *
-        60) /
-        3).toFixed(2)}
+      {(
+        ((state.correctInputCount / (Date.now() - state.startTime)) *
+          1000 *
+          60) /
+        3
+      ).toFixed(2)}
       <Prompt
         typed={state.typedChars}
         tail={state.remChars}
