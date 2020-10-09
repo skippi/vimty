@@ -136,16 +136,22 @@ function AppView(_: {}) {
   });
   return (
     <div>
-      <input
-        type="number"
-        value={state.testSize || ""}
-        onChange={(event) =>
-          dispatch({ type: "CONFIG", size: event.target.valueAsNumber })
-        }
-      />
-      ACC:{" "}
-      {(state.correctInputCount /
-        (state.correctInputCount + state.wrongInputCount)).toFixed(4)}
+      <span>
+        <span onClick={() => dispatch({ type: "CONFIG", size: 10 })}>10</span>
+        <span> / </span>
+        <span onClick={() => dispatch({ type: "CONFIG", size: 25 })}>25</span>
+        <span> / </span>
+        <span onClick={() => dispatch({ type: "CONFIG", size: 50 })}>50</span>
+        <span> / </span>
+        <span onClick={() => dispatch({ type: "CONFIG", size: 100 })}>100</span>
+        <span> / </span>
+        <span onClick={() => dispatch({ type: "CONFIG", size: 200 })}>200</span>
+      </span>
+      &nbsp; ACC:{" "}
+      {(
+        state.correctInputCount /
+        (state.correctInputCount + state.wrongInputCount)
+      ).toFixed(4)}
       <Prompt
         typed={state.typedChars}
         tail={state.remChars}
