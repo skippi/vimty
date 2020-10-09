@@ -46,7 +46,14 @@ function genOperation(): string {
 
 type Millisecond = number;
 
+enum Mode {
+  Normal,
+  Command,
+}
+
 interface App {
+  mode: Mode;
+  commandInput: string;
   correctInputCount: number;
   startTime: Millisecond;
   wrongInputCount: number;
@@ -74,27 +81,10 @@ interface ConfigAction {
 
 const app = produce((draft: Draft<App>, action: Action) => {
   if (action.type == "INPUT") {
-    const { key } = action;
-    if (key === ":") {
-      Object.assign(draft, app(draft, { type: "RESET" }));
-      return
-    }
-    if (key === "Shift") return;
-    if (draft.remChars === undefined) return;
-    if (key === "Escape" || key !== draft.remChars.charAt(0)) {
-      draft.wrongInputCount += 1;
-      draft.remChars = draft.typedChars + draft.remChars;
-      draft.typedChars = "";
-      return;
-    }
-    draft.correctInputCount += 1;
-    if (draft.remChars.length > 1) {
-      draft.remChars = draft.remChars.substring(1);
-      draft.typedChars += key;
-    } else {
-      draft.remChars = draft.remOperations[0];
-      draft.remOperations.shift();
-      draft.typedChars = "";
+    if (draft.mode == Mode.Normal) {
+      Object.assign(draft, normalInput(draft, action.key));
+    } else if (draft.mode == Mode.Command) {
+      Object.assign(draft, commandInput(draft, action.key));
     }
   } else if (action.type == "RESET") {
     const size = isNaN(draft.testSize) ? 0 : draft.testSize;
@@ -108,6 +98,47 @@ const app = produce((draft: Draft<App>, action: Action) => {
     draft.testSize = action.size;
     Object.assign(draft, app(draft, { type: "RESET" }));
   }
+});
+
+const normalInput = produce((draft: Draft<App>, key: string) => {
+  if (key === ":") {
+    draft.mode = Mode.Command;
+    return;
+  }
+  if (key === "Shift") return;
+  if (draft.remChars === undefined) return;
+  if (key === "Escape" || key !== draft.remChars.charAt(0)) {
+    draft.wrongInputCount += 1;
+    draft.remChars = draft.typedChars + draft.remChars;
+    draft.typedChars = "";
+    return;
+  }
+  draft.correctInputCount += 1;
+  if (draft.remChars.length > 1) {
+    draft.remChars = draft.remChars.substring(1);
+    draft.typedChars += key;
+  } else {
+    draft.remChars = draft.remOperations[0];
+    draft.remOperations.shift();
+    draft.typedChars = "";
+  }
+});
+
+const commandInput = produce((draft: Draft<App>, key: string) => {
+  if (key === "Escape") {
+    draft.commandInput = "";
+    draft.mode = Mode.Normal;
+    return;
+  }
+  if (key === "Enter") {
+    if (draft.commandInput == "edit") {
+      Object.assign(draft, app(draft, { type: "RESET" }));
+    }
+    draft.commandInput = "";
+    draft.mode = Mode.Normal;
+    return;
+  }
+  draft.commandInput += key;
 });
 
 function modifyKey(key: string, shift: boolean): string {
@@ -131,6 +162,8 @@ function useEventListener(event: string, handler: EventListener) {
 
 function AppView(_: {}) {
   const [state, dispatch] = useReducer(app, {
+    mode: Mode.Normal,
+    commandInput: "",
     startTime: Date.now(),
     correctInputCount: 0,
     wrongInputCount: 0,
@@ -172,6 +205,8 @@ function AppView(_: {}) {
         tail={state.remChars}
         remaining={state.remOperations}
       />
+      <br />
+      {state.mode == Mode.Command && <span>:{state.commandInput}</span>}
     </div>
   );
 }
