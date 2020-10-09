@@ -144,8 +144,8 @@ function AppView(_: {}) {
         }
       />
       ACC:{" "}
-      {state.correctInputCount /
-        (state.correctInputCount + state.wrongInputCount)}
+      {(state.correctInputCount /
+        (state.correctInputCount + state.wrongInputCount)).toFixed(4)}
       <Prompt
         typed={state.typedChars}
         tail={state.remChars}
