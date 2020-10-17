@@ -1,6 +1,21 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import produce, { Draft } from "immer";
+import {} from "styled-components/cssprop";
+import styled, { createGlobalStyle } from "styled-components";
+
+const GlobalStyle = createGlobalStyle`
+@font-face {
+  font-family: "Cascadia Mono";
+  src: url("./CascadiaMono.woff2") format("woff2");
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+`;
 
 const { useEffect, useReducer, useRef } = React;
 
@@ -160,6 +175,38 @@ function useEventListener(event: string, handler: EventListener) {
   }, [event, window]);
 }
 
+const StyledApp = styled.div`
+  display: grid;
+  font-family: "Cascadia Mono";
+  font-size: 20px;
+  grid-template-areas: "header-window" "buf-windows" "command-window";
+  grid-template-rows: 1.25em 10em 1.25em;
+  margin: 5rem;
+`;
+
+const HeaderWindow = styled.div`
+  background-color: #373737;
+  color: #d4d4d4;
+  grid-area: header-window;
+  padding-left: 0.25em;
+  padding-right: 0.25em;
+`;
+
+const BufferWindows = styled.div`
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  grid-area: buf-windows;
+  overflow: hidden;
+  padding-left: 0.25em;
+  padding-right: 0.25em;
+`;
+
+const CommandWindow = styled.div`
+  background-color: #373737;
+  color: #d4d4d4;
+  grid-area: command-window;
+`;
+
 function AppView(_: {}) {
   const [state, dispatch] = useReducer(app, {
     mode: Mode.Normal,
@@ -176,8 +223,9 @@ function AppView(_: {}) {
     dispatch({ type: "INPUT", key: modifyKey(event.key, event.shiftKey) });
   });
   return (
-    <div>
-      <span>
+    <StyledApp>
+      <GlobalStyle />
+      <HeaderWindow>
         <span onClick={() => dispatch({ type: "CONFIG", size: 10 })}>10</span>
         <span> / </span>
         <span onClick={() => dispatch({ type: "CONFIG", size: 25 })}>25</span>
@@ -187,27 +235,34 @@ function AppView(_: {}) {
         <span onClick={() => dispatch({ type: "CONFIG", size: 100 })}>100</span>
         <span> / </span>
         <span onClick={() => dispatch({ type: "CONFIG", size: 200 })}>200</span>
-      </span>
-      &nbsp; ACC:{" "}
-      {(
-        state.correctInputCount /
-        (state.correctInputCount + state.wrongInputCount)
-      ).toFixed(4)}
-      &nbsp; / CPM:{" "}
-      {(
-        ((state.correctInputCount / (Date.now() - state.startTime)) *
-          1000 *
-          60) /
-        3
-      ).toFixed(2)}
-      <Prompt
-        typed={state.typedChars}
-        tail={state.remChars}
-        remaining={state.remOperations}
-      />
-      <br />
-      {state.mode == Mode.Command && <span>:{state.commandInput}</span>}
-    </div>
+        &nbsp; ACC:{" "}
+        {(
+          state.correctInputCount /
+          (state.correctInputCount + state.wrongInputCount)
+        ).toFixed(4)}
+        &nbsp; / CPM:{" "}
+        {(
+          ((state.correctInputCount / (Date.now() - state.startTime)) *
+            1000 *
+            60) /
+          3
+        ).toFixed(2)}
+      </HeaderWindow>
+      <BufferWindows>
+        <Prompt
+          typed={state.typedChars}
+          tail={state.remChars}
+          remaining={state.remOperations}
+        />
+      </BufferWindows>
+      <CommandWindow>
+        {state.mode == Mode.Command ? (
+          <span>:{state.commandInput}</span>
+        ) : (
+          <span>&nbsp;</span>
+        )}
+      </CommandWindow>
+    </StyledApp>
   );
 }
 
