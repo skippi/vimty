@@ -1,0 +1,25 @@
+name: gh-pages
+on: push
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2.3.1
+        with:
+          persist-credentials: false
+      - name: setup-node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: build
+        run: |
+          yarn install
+          yarn run webpack
+      - name: deploy
+        uses: JamesIves/github-pages-deploy-action@3.7.1
+        with:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          BRANCH: gh-pages
+          FOLDER: public
+          CLEAN: true
