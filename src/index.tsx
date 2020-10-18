@@ -154,7 +154,10 @@ const commandInput = produce((draft: Draft<App>, key: string) => {
     if (args.length == 1 && args[0] == "edit") {
       Object.assign(draft, app(draft, { type: "RESET" }));
     } else if (args.length == 2 && args[0] == "config") {
-      Object.assign(draft, app(draft, { type: "CONFIG", size: parseInt(args[1]) }));
+      Object.assign(
+        draft,
+        app(draft, { type: "CONFIG", size: parseInt(args[1]) })
+      );
     }
     draft.commandInput = "";
     draft.mode = Mode.Normal;
@@ -233,16 +236,7 @@ function AppView(_: {}) {
     <StyledApp>
       <GlobalStyle />
       <HeaderWindow>
-        <span onClick={() => dispatch({ type: "CONFIG", size: 10 })}>10</span>
-        <span> / </span>
-        <span onClick={() => dispatch({ type: "CONFIG", size: 25 })}>25</span>
-        <span> / </span>
-        <span onClick={() => dispatch({ type: "CONFIG", size: 50 })}>50</span>
-        <span> / </span>
-        <span onClick={() => dispatch({ type: "CONFIG", size: 100 })}>100</span>
-        <span> / </span>
-        <span onClick={() => dispatch({ type: "CONFIG", size: 200 })}>200</span>
-        &nbsp; ACC:{" "}
+        ACC:{" "}
         {(
           state.correctInputCount /
           (state.correctInputCount + state.wrongInputCount)
