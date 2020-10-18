@@ -4,6 +4,8 @@ import produce, { Draft } from "immer";
 import {} from "styled-components/cssprop";
 import styled, { createGlobalStyle } from "styled-components";
 
+import { times } from "./util/algorithm";
+
 const GlobalStyle = createGlobalStyle`
 @font-face {
   font-family: "Cascadia Mono";
@@ -44,14 +46,6 @@ const MOTIONS = [
   "ge",
   "gE",
 ];
-
-function times<T>(fn: () => T, n: number): T[] {
-  const ops: T[] = [];
-  for (let i = 0; i < n; ++i) {
-    ops.push(fn());
-  }
-  return ops;
-}
 
 function genOperation(): string {
   const operator = OPERATORS[Math.floor(Math.random() * OPERATORS.length)];
