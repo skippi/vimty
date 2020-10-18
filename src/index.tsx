@@ -150,8 +150,11 @@ const commandInput = produce((draft: Draft<App>, key: string) => {
     return;
   }
   if (key === "Enter") {
-    if (draft.commandInput == "edit") {
+    const args = draft.commandInput.split(/[\s]+/);
+    if (args.length == 1 && args[0] == "edit") {
       Object.assign(draft, app(draft, { type: "RESET" }));
+    } else if (args.length == 2 && args[0] == "config") {
+      Object.assign(draft, app(draft, { type: "CONFIG", size: parseInt(args[1]) }));
     }
     draft.commandInput = "";
     draft.mode = Mode.Normal;
