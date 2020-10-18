@@ -145,6 +145,10 @@ const commandInput = produce((draft: Draft<App>, key: string) => {
     draft.mode = Mode.Normal;
     return;
   }
+  if (key === "Backspace") {
+    draft.commandInput = draft.commandInput.slice(0, -1);
+    return;
+  }
   if (key === "Enter") {
     if (draft.commandInput == "edit") {
       Object.assign(draft, app(draft, { type: "RESET" }));
