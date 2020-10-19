@@ -4,6 +4,7 @@ import {} from "styled-components/cssprop";
 import styled, { createGlobalStyle } from "styled-components";
 
 import { Mode, app, baseState } from "./app/reducer";
+import { useEventListener } from "./util/react";
 
 const GlobalStyle = createGlobalStyle`
 @font-face {
@@ -18,25 +19,11 @@ const GlobalStyle = createGlobalStyle`
 }
 `;
 
-const { useEffect, useReducer, useRef } = React;
+const { useReducer } = React;
 
 function modifyKey(key: string, shift: boolean): string {
   if (key.length > 1) return key;
   return shift ? key.toUpperCase() : key.toLowerCase();
-}
-
-function useEventListener(event: string, handler: EventListener) {
-  const ref: { current: EventListener } = useRef();
-  useEffect(() => {
-    ref.current = handler;
-  }, [handler]);
-  useEffect(() => {
-    const listener = (event: Event) => ref.current(event);
-    addEventListener(event, listener);
-    return () => {
-      removeEventListener(event, listener);
-    };
-  }, [event, window]);
 }
 
 const StyledApp = styled.div`

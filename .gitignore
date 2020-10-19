@@ -1,3 +1,4 @@
-public/bundle.js
+public/bundle*
+public/index.html
 node_modules
 yarn-error.log
